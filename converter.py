@@ -1,39 +1,30 @@
+from pytube import exceptions, YouTube
 import os
 from pathlib import Path
-from moviepy.editor import *
 import wx
-import urllib as url
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
-import pafy
-import youtube_dl
-from playsound import playsound # for playing audio
-import multiprocessing # for stopping audio
-import time # for pausing audio
  
 class MyFrame(wx.Frame):
     def __init__(self):
         super().__init__(parent=None, title='Program')
  
-        #Declare Vars
-        self.fileCount = 0
-        self.eleNum = 1
-        self.audioPathList = []
-        self.valid_tags = ['iframe', 'video', 'source'] # maybe not need
- 
         #Find or Create Program Files
         self.hubPath = Path().home().joinpath("Documents\ADP")
         self.audioPath = Path().home().joinpath("Documents\ADP\AudioArchive")
-        self.videoPath = Path().home().joinpath("Documents\ADP\VideoTempStorage")
+        self.videoPath = Path().home().joinpath("Documents\ADP\VideoArchive")
  
-        if(not os.path.isdir(self.hubPath)):
-            print("path does not exist")
+        if(not os.path.exists(self.hubPath)):
+            print("main path does not exist")
             os.mkdir(self.hubPath)
+        if(not os.path.exists(self.audioPath)):
+            print("audio path does not exist")
             os.mkdir(self.audioPath)
+        if(not os.path.exists(self.videoPath)):
+            print("video path does not exist")
             os.mkdir(self.videoPath)
  
         #intialize panel & Sizer
-        #self.panel = wx.Panel(self)
         self.panel = wx.ScrolledWindow(self, -1)
         self.panel.SetScrollbars(1, 1, 600, 400)
         self.panel.SetScrollRate(10,10)
@@ -51,110 +42,105 @@ class MyFrame(wx.Frame):
  
         self.text_ctrl = wx.TextCtrl(self.panel)
         self.MainSizer.Add(self.text_ctrl, 0, wx.ALL | wx.EXPAND | wx.RESERVE_SPACE_EVEN_IF_HIDDEN, 5)
-       
-        self.urlGrabButton = wx.Button(self.panel, label="Download")
-        self.urlGrabButton.Bind(wx.EVT_BUTTON, self.ScanURL)
-        self.MainSizer.Add(self.urlGrabButton, 0, wx.ALL, 5)
  
-        self.list = wx.ListBox(self.panel, -1, (0,100), wx.Size(200,100), self.audioPathList, style=1)
-        self.list.Bind(wx.EVT_LISTBOX, self.get_selected_clip, self.list)
-        self.list.Show(False)
-        self.MainSizer.Add(self.list, 1, wx.ALL | wx.ALIGN_LEFT, 5)
- 
-        self.libraryButton = wx.Button(self.panel, label="Show Library")
-        self.libraryButton.Bind(wx.EVT_BUTTON, self.SwitchUIElements)
-        self.MainSizer.Add(self.libraryButton, 0, wx.ALL, 5)
+        self.audioButton = wx.Button(self.panel, label="Download Audio")
+        self.audioButton.Bind(wx.EVT_BUTTON, self.DownLoadAudio)
+        self.MainSizer.Add(self.audioButton, 0, wx.ALL, 5)
+
+        self.videoButton = wx.Button(self.panel, label="Download Video")
+        self.videoButton.Bind(wx.EVT_BUTTON, self.DownLoadVideo)
+        self.MainSizer.Add(self.videoButton, 0, wx.ALL, 5)
  
         self.contain = wx.BoxSizer(wx.HORIZONTAL)
         self.MainSizer.Add(self.contain)
         self.contain2 = wx.BoxSizer(wx.HORIZONTAL)
         self.MainSizer.Add(self.contain2)
- 
-        # play hud wx elements
-        self.playButton = wx.Button(self.panel, name = 'play', label='Play', size=(55,20))
-        self.contain.Add(self.playButton, 0, wx.ALL | wx.CENTER, 5)
-        self.playButton.Bind(wx.EVT_BUTTON, self.ButtonName)
-        self.pauseButton = wx.Button(self.panel, name = 'pause', label='Pause', size=(55,20))
-        self.contain.Add(self.pauseButton, 0, wx.ALL | wx.CENTER, 5)
-        self.pauseButton.Bind(wx.EVT_BUTTON, self.ButtonName)
-        self.stopButton = wx.Button(self.panel, name = 'stop', label='Stop', size=(55,20))
-        self.contain.Add(self.stopButton, 0, wx.ALL | wx.CENTER, 5)
-        self.stopButton.Bind(wx.EVT_BUTTON, self.ButtonName)
-        self.autoPlayButton = wx.Button(self.panel, name = 'autoplay', label='AutoPlay', size=(55,20))
-        self.contain2.Add(self.autoPlayButton, 0, wx.ALL | wx.CENTER, 5)
-        self.autoPlayButton.Bind(wx.EVT_BUTTON, self.ButtonName)
-        self.shuffleButton = wx.Button(self.panel, name = 'shuffle', label='Shuffle', size=(55,20))
-        self.contain2.Add(self.shuffleButton, 0, wx.ALL | wx.CENTER, 5)
-        self.shuffleButton.Bind(wx.EVT_BUTTON, self.ButtonName)
-        self.playButton.Show(False)
-        self.pauseButton.Show(False)
-        self.stopButton.Show(False)
-        self.shuffleButton.Show(False)
-        self.autoPlayButton.Show(False)
        
         #Final Setup
         self.panel.SetSizer(self.MainSizer)
         self.RefreshElements()
  
     #Class Functions
-    def BackTrigger(self, event):
+    #Refreshes GUI when Back button is clicked back to main screen
+    def BackTrigger(self, *args):
         self.readText.Show()
         self.text_ctrl.Show()
-        self.urlGrabButton.Show()
-        self.libraryButton.Show()
+        self.audioButton.Show()
+        self.videoButton.Show()
  
         self.backButton.Show(False)
-        self.list.Show(False)
-        self.playButton.Show(False)
-        self.pauseButton.Show(False)
-        self.stopButton.Show(False)
-        self.autoPlayButton.Show(False)
-        self.shuffleButton.Show(False)
         self.RefreshElements()
  
-    def SwitchUIElements(self, event):
+    #Controlling GUI Elements when download audio is clicked
+    def DownLoadAudio(self, event):
         self.readText.Show(False)
         self.text_ctrl.Show(False)
-        self.urlGrabButton.Show(False)
-        self.libraryButton.Show(False)
+        self.audioButton.Show(False)
+        self.videoButton.Show(False)
  
         self.backButton.Show()
-        self.list.Show()
-        self.playButton.Show()
-        self.pauseButton.Show()
-        self.stopButton.Show()
-        self.autoPlayButton.Show()
-        self.shuffleButton.Show()
+        self.ScanURL("audio")
         self.RefreshElements()
+
+    #Controlling GUI Elements when download video is clicked
+    def DownLoadVideo(self, event):
+        self.readText.Show(False)
+        self.text_ctrl.Show(False)
+        self.audioButton.Show(False)
+        self.videoButton.Show(False)
  
-    def get_selected_clip(self):
-        selectedClip = self.list.GetSelection()
-        print(selectedClip)
- 
-    #Read clip files in program folder
-    def ReadClips(self):
-        for e in os.listdir(self.audioPath):
-            self.audioPathList.append(e)
- 
-    def ButtonName(self, event): # example test
-        print(event.GetEventObject().GetName())
- 
-    def ScanURL(self, event):
+        self.backButton.Show()
+        self.ScanURL("video")
+        self.RefreshElements()
+
+    #Function to scan the url and decide what to do with the url
+    def ScanURL(self, whichButton):
         formData = self.text_ctrl.GetValue()
+        #see if the url is valid
         validate = URLValidator()
         try:
             validate(formData)
-            #print("Valid URL")
+            print("Valid URL")
+            #see if youtube url will work or not
+            try:
+                yt = YouTube(formData)
+                print(yt.title)
+                #if user clicks the audio button
+                if(whichButton == "audio"):
+                    print("audio file")
+                    #streams the audio video
+                    file = yt.streams.filter(only_audio = True)
+                    stream = yt.streams.get_by_itag(140)
+                    #changes file type from mp4 to mp3
+                    out_file = stream.download(output_path=str(self.audioPath))
+                    base, ext = os.path.splitext(out_file)
+                    new_file = base + '.mp3'
+                    os.rename(out_file, new_file)
+                #if user clicks the video button
+                elif(whichButton == "video"):
+                    print("video file")
+                    #downloads the video file
+                    file = yt.streams.filter(file_extension='mp4')
+                    stream = yt.streams.get_by_itag(18)
+                    stream.download(output_path=str(self.videoPath))
+            #exception handler for pytube
+            except exceptions.PytubeError:
+                print("Not a valid Youtube link")
+                self.BackTrigger()
+                self.text_ctrl.Clear()
+        #exception handler for invalid url entry
         except ValidationError as e:
-            #print("Not a URL")
+            print("Not a URL")
             self.text_ctrl.Clear()
  
+    #Refreshes GUI Elements
     def RefreshElements(self):
         self.MainSizer.Fit(self)
         self.SetSize(500,400)
         self.MainSizer.Layout()
         self.Show()
- 
+
+#Runs Script
 if __name__ == '__main__':
     app = wx.App()
     frame = MyFrame()
