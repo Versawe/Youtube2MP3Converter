@@ -1,0 +1,5 @@
+https://stackoverflow.com/questions/61574984/no-module-named-pkg-resources-py2-warn-pyinstaller
+
+https://groups.google.com/g/pyinstaller/c/PsdNus1ujqw
+
+https://stackoverflow.com/questions/59035724/python-error-no-module-named-pkg-resources/60063283#60063283
