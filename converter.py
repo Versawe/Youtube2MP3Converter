@@ -112,7 +112,7 @@ class MyFrame(wx.Frame):
                 #if user clicks the audio button
                 if(whichButton == "audio"):
                     print("audio file")
-                    self.readText.SetLabel("Downloading Audio File")
+                    self.readText.SetLabel("Sucessfully Downloaded Audio File")
                     #streams the audio video
                     file = yt.streams.filter(only_audio = True)
                     stream = yt.streams.get_by_itag(140)
@@ -124,7 +124,7 @@ class MyFrame(wx.Frame):
                 #if user clicks the video button
                 elif(whichButton == "video"):
                     print("video file")
-                    self.readText.SetLabel("Downloading Video File")
+                    self.readText.SetLabel("Sucessfully Downloaded Video File")
                     #downloads the video file
                     file = yt.streams.filter(file_extension='mp4')
                     stream = yt.streams.get_by_itag(18)
@@ -132,8 +132,9 @@ class MyFrame(wx.Frame):
             #exception handler for pytube
             except exceptions.PytubeError:
                 print("Not a valid Youtube link")
-                self.readText.SetLabel("Submission is not valid Youtube Video")
+                
                 self.BackTrigger()
+                self.readText.SetLabel("Submission is not valid Youtube Video")
                 self.text_ctrl.Clear()
         #exception handler for invalid url entry
         except ValidationError as e:
@@ -146,6 +147,7 @@ class MyFrame(wx.Frame):
         self.MainSizer.Fit(self)
         self.SetSize(500,400)
         self.MainSizer.Layout()
+        self.text_ctrl.Clear()
         self.Show()
 
 #Runs Script
