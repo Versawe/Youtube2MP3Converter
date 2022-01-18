@@ -4,6 +4,12 @@ from pathlib import Path
 import wx
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
+
+#may fix PyInstaller error
+try:
+    import pkg_resources.py2_warn
+except ImportError:
+    pass
  
 class MyFrame(wx.Frame):
     def __init__(self):
