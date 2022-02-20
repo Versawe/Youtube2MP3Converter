@@ -1,3 +1,4 @@
+from fileinput import filename
 from pytube import exceptions, YouTube
 import os
 from pathlib import Path
@@ -56,6 +57,16 @@ class MyFrame(wx.Frame):
         self.videoButton = wx.Button(self.panel, label="Download Video")
         self.videoButton.Bind(wx.EVT_BUTTON, self.DownLoadVideo)
         self.MainSizer.Add(self.videoButton, 0, wx.ALL, 5)
+
+        resList = ["360p", "720p"]
+        self.resOptions = wx.ComboBox(self.panel, choices=resList, style=0, value="360p")
+        self.resOptions.Show(False)
+        self.MainSizer.Add(self.resOptions, 0, wx.ALL, 5)
+
+        self.qualityButton = wx.Button(self.panel, label="Confirm Quality")
+        self.qualityButton.Bind(wx.EVT_BUTTON, self.SelectQuality)
+        self.MainSizer.Add(self.qualityButton, 0, wx.ALL, 5)
+        self.qualityButton.Show(False)
  
         self.contain = wx.BoxSizer(wx.HORIZONTAL)
         self.MainSizer.Add(self.contain)
@@ -74,8 +85,11 @@ class MyFrame(wx.Frame):
         self.text_ctrl.Show()
         self.audioButton.Show()
         self.videoButton.Show()
- 
+
+        self.resOptions.Show(False)
         self.backButton.Show(False)
+        self.qualityButton.Show(False)
+        self.text_ctrl.Clear()
         self.RefreshElements()
  
     #Controlling GUI Elements when download audio is clicked
@@ -93,10 +107,24 @@ class MyFrame(wx.Frame):
     #Controlling GUI Elements when download video is clicked
     def DownLoadVideo(self, event):
         self.readText.Show()
+        self.readText.SetLabel("Select Video Quality")
+        self.resOptions.Show()
+        self.audioButton.Show(False)
+        self.videoButton.Show(False)
+ 
+        self.qualityButton.Show()
+        self.backButton.Show()
+        self.RefreshElements()
+    
+        #Controlling GUI Elements when download video is clicked
+    def SelectQuality(self, event):
+        self.readText.Show()
         self.readText.SetLabel("Attempting to Download mp4")
         self.text_ctrl.Show(False)
         self.audioButton.Show(False)
         self.videoButton.Show(False)
+        self.qualityButton.Show(False)
+        self.resOptions.Show(False)
  
         self.backButton.Show()
         self.ScanURL("video")
@@ -130,11 +158,17 @@ class MyFrame(wx.Frame):
                 #if user clicks the video button
                 elif(whichButton == "video"):
                     print("video file")
+                    qualityData = self.resOptions.GetValue()
                     self.readText.SetLabel("Sucessfully Downloaded Video File")
                     #downloads the video file
                     file = yt.streams.filter(file_extension='mp4')
-                    stream = yt.streams.get_by_itag(18)
-                    stream.download(output_path=str(self.videoPath))
+                    if(qualityData == "360p"):
+                        stream = yt.streams.get_by_itag(18)
+                    elif(qualityData == "720p"):
+                        stream = yt.streams.get_by_itag(22)
+                    else:
+                        stream = yt.streams.get_by_itag(18)
+                    stream.download(output_path=str(self.videoPath), filename_prefix = qualityData +"_")
             #exception handler for pytube
             except exceptions.PytubeError:
                 print("Not a valid Youtube link")
@@ -153,7 +187,7 @@ class MyFrame(wx.Frame):
         self.MainSizer.Fit(self)
         self.SetSize(500,400)
         self.MainSizer.Layout()
-        self.text_ctrl.Clear()
+        #self.text_ctrl.Clear()
         self.Show()
 
 #Runs Script
