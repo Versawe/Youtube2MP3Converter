@@ -5,6 +5,7 @@ from pathlib import Path
 import wx
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
+import ConvertShorts
 
 #may fix PyInstaller error
 try:
@@ -132,7 +133,7 @@ class MyFrame(wx.Frame):
 
     #Function to scan the url and decide what to do with the url
     def ScanURL(self, whichButton):
-        formData = self.text_ctrl.GetValue()
+        formData = ConvertShorts.convert_shorts(self.text_ctrl.GetValue())
         #see if the url is valid
         validate = URLValidator()
         try:

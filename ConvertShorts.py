@@ -1,6 +1,6 @@
 import re
 
-exampleList = [
+'''exampleList = [
     "https://www.youtube.com/shorts/3LHKO-2eC-M",
     "https://www.youtube.com/watch?v=YRK-NahQsfw",
     "https://www.youtube.com/shorts/YRK-NahQsfw",
@@ -8,7 +8,7 @@ exampleList = [
     "https://www.youtube.com/shorts/i3vngxQSVpk",
     "https://www.youtube.com/shorts/O2lBBUb9pAw",
     "https://www.youtube.com/watch?v=O2lBBUb9pAw"
-]
+]'''
 
 def convert_shorts(link):
     newLink = ""
@@ -20,6 +20,6 @@ def convert_shorts(link):
         newLink = link
     return newLink
 
-for e in exampleList:
+'''for e in exampleList:
     e = convert_shorts(e)
-    print(e)
+    print(e)'''
