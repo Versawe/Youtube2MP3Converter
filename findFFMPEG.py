@@ -7,6 +7,8 @@ def Find_ffmpeg_Path():
     for path in Path.home().rglob('*ffmpeg.exe'):
         if(re.search(r'bin\\ffmpeg.exe', str(path))):
             ffmpegPath = path
+    if(ffmpegPath == ""):
+        ffmpegPath = None
 
     print(ffmpegPath)
     return ffmpegPath

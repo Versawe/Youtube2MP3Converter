@@ -2,11 +2,16 @@ import youtube_dl
 from pathlib import Path
 import findFFMPEG
 import ConvertShorts
+from sys import exit
 
 class Example():
     def __init__(self) -> None:
         self.outPutPath = Path.home()
         self.ffmpegPath = str(findFFMPEG.Find_ffmpeg_Path())
+
+        if(self.ffmpegPath == None):
+            exit("You need to download FFMPEG")
+
         self.outPutPath = self.outPutPath.joinpath(self.outPutPath, "Extractions")
         self.outPutPath1 = self.outPutPath.joinpath(self.outPutPath, "Videos")
         self.outPutPath2 = self.outPutPath.joinpath(self.outPutPath, "Audio")
