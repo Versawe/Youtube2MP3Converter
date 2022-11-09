@@ -17,8 +17,12 @@ class Example():
             self.outPutPath1.mkdir(parents=True, exist_ok=True)
             self.outPutPath2.mkdir(parents=True, exist_ok=True)
 
+        self.Await_Input()
+
+    def Await_Input(self):
         user_input = input("-a for audio\n-v for video\nFollowed by URL\n")
         self.Check_Input(user_input)
+        self.Await_Input()
 
     def Check_Input(self, input):
         print(input[:2])
