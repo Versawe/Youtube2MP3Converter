@@ -1,6 +1,7 @@
 import youtube_dl
 from pathlib import Path
 import findFFMPEG
+import ConvertShorts
 
 class Example():
     def __init__(self) -> None:
@@ -23,15 +24,17 @@ class Example():
         print(input[:2])
         if(input[:2] == "-a"):
             print(input[3:len(input)])
+            theURL = ConvertShorts.convert_shorts(input[3:len(input)])
             try:
-                self.Download_Audio(input[3:len(input)])
+                self.Download_Audio(theURL)
             except Exception as e:
                 print(str(e))
                 pass
         elif(input[:2] == "-v"):
             print(input[3:len(input)])
+            theURL = ConvertShorts.convert_shorts(input[3:len(input)])
             try:
-                self.Download_Video(input[3:len(input)])
+                self.Download_Video(theURL)
             except Exception as e:
                 print(str(e))
                 pass
