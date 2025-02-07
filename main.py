@@ -66,9 +66,15 @@ class Example():
 
     def Download_Video(self, url):
         ydl_opts = {
-            'format': 'bestvideo/best',
+            'format': 'bestvideo+bestaudio/best',
             'outtmpl': str(self.outPutPath1) + "\\%(title)s.%(ext)s",
             'noplaylist': True,
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp4',
+                'preferredquality': '192'
+            }],
+            'ffmpeg_location': self.ffmpegPath
         }
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             result = ydl.download([url])
